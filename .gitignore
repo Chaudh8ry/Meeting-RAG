@@ -2,3 +2,5 @@
 .venv/
 downloads/
 *.wav
+sarvam_outputs/
+__pycache__/
