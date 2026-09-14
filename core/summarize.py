@@ -9,7 +9,7 @@ import os
 # Function to initialize and return the Mistral LLM instance
 def get_llm():
     return ChatMistralAI(
-        model="mistral-small-latest", 
+        model="ministral-3b-2512", 
         mistral_api_key=os.getenv("MISTRAL_API_KEY")  # Load API key from environment variables
     )
 
@@ -62,7 +62,7 @@ def summarize(transcript: str) -> str:
         | RunnableLambda(lambda x: {"text": x}) 
         | combined_prompt 
         | llm 
-        | StrOutputParser
+        | StrOutputParser()
     )
 
     # Return the final combined summary
@@ -84,7 +84,7 @@ def generate_title(transcript: str) -> str:
             ("human", "{text}")
         ])     
         | llm
-        | StrOutputParser
+        | StrOutputParser()
     )
 
     # Use only the first 2000 characters of transcript for title generation

@@ -37,7 +37,7 @@ def download_youtube_audio(url: str) -> str:
     return filename
 
 # Example usage: download audio from a YouTube link and print the saved filename
-data = download_youtube_audio("https://youtu.be/P-D8udHlb70")
+# data = download_youtube_audio("https://www.youtube.com/watch?v=_Q-e_nczWqM&t=223s")
 
 def convert_to_wav(input_path: str) -> str:
     """Convert any audio/video file to WAV format using pydub."""
@@ -52,7 +52,7 @@ def convert_to_wav(input_path: str) -> str:
     return output_path
 
 # Convert the downloaded file to WAV format
-data_final = convert_to_wav(data)
+# data_final = convert_to_wav(data)
 
 def chunk_audio(wav_path: str, chunk_minutes: int = 10) -> list:
     """Split a WAV file into smaller chunks of fixed duration."""
@@ -79,7 +79,7 @@ def chunk_audio(wav_path: str, chunk_minutes: int = 10) -> list:
 def process_input(source: str) -> list:
     """Process input (YouTube URL or local file) into WAV chunks."""
     # Check if input is a YouTube link
-    if source.startswith("http://youtu.be") or source.startswith("https://youtu.be/"):
+    if source.startswith("http://") or source.startswith("https://"):
         print("Detected YouTube URL. Downloading audio.....")
         wav_path = download_youtube_audio(source)
     else:
