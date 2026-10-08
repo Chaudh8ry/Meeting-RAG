@@ -8,10 +8,10 @@ WHISPER_MODEL = os.getenv("WHISPER_MODEL","small")
 
 SARVAM_API_KEY = os.getenv("SARVAM_API_KEY")
 SARVAM_MODEL = os.getenv("SARVAM_STT_MODEL","saaras:v3")
-SARVAM_LANGUAGE = os.getenv("SARVAM_LANGUAGE","hi-IN")
+# SARVAM_LANGUAGE = os.getenv("SARVAM_LANGUAGE","hi-IN")
 
 SARVAM_OUTPUT_DIR = "sarvam_outputs"
-SARVAM_MAX_FILES_PER_JOB = 20
+SARVAM_MAX_FILES_PER_JOB = 20 # max no. of files we can put in one batch
 
 _whisper_model = None
 _sarvam_client = None
@@ -26,11 +26,11 @@ def load_model():
         print("whisper model loaded successfully")
     return _whisper_model
 
-
+# transcribing one chunk with whisper
 def transcribe_chunk_whisper(chunk_path: str) -> str:
     model = load_model()
     result = model.transcribe(chunk_path,task = "transcribe")
-    return result['text']
+    return result['text'] # returns only the actual transcript 'text' from dictionary
 
 # ------------------- Sarvam (Hindi/Hinglish, via Batch API) ------------------
 def get_sarvam_client() -> SarvamAI:
@@ -51,14 +51,14 @@ def run_sarvam_batch_job(file_paths: list) -> dict:
     job = client.speech_to_text_job.create_job(
         model=SARVAM_MODEL,
         mode="translate",
-        with_diarization=False,
+        with_diarization=False, # for speaker separation
     )
 
     job.upload_files(file_paths=file_paths)
     job.start()
 
     print(f"  → Sarvam batch job submitted for {len(file_paths)} file(s), waiting...")
-    job.wait_until_complete(poll_interval=5, timeout=1800)
+    job.wait_until_complete(poll_interval=5, timeout=900)
 
     file_results = job.get_file_results()
     for f in file_results.get("failed", []):

@@ -58,8 +58,7 @@ def summarize(transcript: str) -> str:
 
     # Chain: passthrough → lambda (wrap text) → prompt → LLM → output parser
     combined_chain = (
-        RunnablePassthrough() 
-        | RunnableLambda(lambda x: {"text": x}) 
+        RunnableLambda(lambda x: {"text": x}) 
         | combined_prompt 
         | llm 
         | StrOutputParser()
@@ -74,8 +73,7 @@ def generate_title(transcript: str) -> str:
 
     # Chain: passthrough → lambda (wrap text) → prompt → LLM → output parser
     title_chain = (
-        RunnablePassthrough() 
-        | RunnableLambda(lambda x: {"text": x}) 
+        RunnableLambda(lambda x: {"text": x}) 
         | ChatPromptTemplate.from_messages([
             (
                 "system",
