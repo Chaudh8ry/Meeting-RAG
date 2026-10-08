@@ -4,3 +4,4 @@ downloads/
 *.wav
 sarvam_outputs/
 __pycache__/
+vector_db

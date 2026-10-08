@@ -6,7 +6,6 @@ from sarvamai import SarvamAI
 # Configuration
 WHISPER_MODEL = os.getenv("WHISPER_MODEL","small")
 
-SARVAM_API_KEY = os.getenv("SARVAM_API_KEY")
 SARVAM_MODEL = os.getenv("SARVAM_STT_MODEL","saaras:v3")
 # SARVAM_LANGUAGE = os.getenv("SARVAM_LANGUAGE","hi-IN")
 
@@ -36,9 +35,12 @@ def transcribe_chunk_whisper(chunk_path: str) -> str:
 def get_sarvam_client() -> SarvamAI:
     global _sarvam_client
     if _sarvam_client is None:
-        if not SARVAM_API_KEY:
+        # Read this at client creation time so callers that load `.env` during
+        # application startup are supported too.
+        sarvam_api_key = os.getenv("SARVAM_API_KEY")
+        if not sarvam_api_key:
             raise RuntimeError("SARVAM_API_KEY is not set in Environment/ .env")
-        _sarvam_client = SarvamAI(api_subscription_key=SARVAM_API_KEY)
+        _sarvam_client = SarvamAI(api_subscription_key=sarvam_api_key)
     return _sarvam_client
 
 def run_sarvam_batch_job(file_paths: list) -> dict:

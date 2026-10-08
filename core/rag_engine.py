@@ -1,19 +1,36 @@
 import os
-from langchain_mistralai import ChatMistralAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnableLambda, RunnablePassthrough
 from core.vector_store import build_vector_store, load_vector_store, get_retriever
 from langchain_core.output_parsers import StrOutputParser
 
 def get_llm():
-    return ChatMistralAI(
-        model="mistral-small-latest",
-        mistral_api_key=os.getenv("MISTRAL_API_KEY"),
-        temperature=0.3
+    """Use Gemini for RAG answers so Mistral rate limits do not stop chat."""
+    api_key = os.getenv("GOOGLE_API_KEY")
+    if not api_key:
+        raise RuntimeError("GOOGLE_API_KEY is not set in the .env file")
+    return ChatGoogleGenerativeAI(
+        model="gemini-2.5-flash-lite",
+        api_key=api_key,
+        temperature=0.3,
     )
 
-def format_docs(docs):
-    return "\n\n".join([docs.page_content for doc in docs])
+def format_docs(docs) -> str:
+    """Convert retriever output into prompt context.
+
+    Most LangChain versions return ``list[Document]`` here, but some runnable
+    compositions yield batches as ``list[list[Document]]``. Normalize both
+    shapes before accessing ``page_content``.
+    """
+    flattened_docs = []
+    for item in docs:
+        if isinstance(item, (list, tuple)):
+            flattened_docs.extend(item)
+        else:
+            flattened_docs.append(item)
+
+    return "\n\n".join(doc.page_content for doc in flattened_docs)
 
 def build_rag_chain(transcript: str):
     vector_store = build_vector_store(transcript)
@@ -84,6 +101,10 @@ Context from meeting transcript:
 
 def ask_question(rag_chain, question: str) -> str:
     print(f"Question: {question}")
-    answer = rag_chain.invoke(question)
+    try:
+        answer = rag_chain.invoke(question)
+    except Exception as error:
+        # Preserve the CLI session and give the user a concise, useful error.
+        answer = f"Unable to answer this question right now: {error}"
     print(f"answer: {answer}")
     return answer
